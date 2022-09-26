@@ -9,8 +9,8 @@ var usersRouter = require("./routes/users");
 
 var app = express();
 
-app.listen(4000, () => {
-  console.log("Server has started on port 4000.");
+app.listen(3000, () => {
+  console.log("Server has started on port 3000.");
 });
 
 // view engine setup
