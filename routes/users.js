@@ -3,38 +3,34 @@ var router = express.Router();
 const db = require("../database.js");
 require("dotenv").config();
 
-//check if user exists
-function userExists(key, value) {
-  let result;
+function insertUser(res, user) {
   db.promise()
-    .query(`SELECT ${key} FROM users`)
-    .then((result) => {
-      for (let i = 0; i < result[0].length; i++) {
-        if (value == result[0][i][key]) return true;
-      }
+    .query(
+      `INSERT INTO users VALUES (DEFAULT, '${user.username}', '${user.first_name}', '${user.last_name}')`
+    )
+    .then(() => {
+      console.log("added to table!");
+      res.send("Successfully added user!");
     });
-  return false;
 }
 
 /* GET users listing. */
 router.get("/", (req, res) => {
   db.promise()
-    .query("SELECT id FROM users")
-    .then((r) => res.send(r[0]));
+    .query(`SELECT * FROM users`)
+    .then((r) => res.send(JSON.stringify(r[0])));
 });
 
-router.post("/", async (req, res) => {
-  const { id, first_name, last_name } = req.body;
-  if (id && first_name && last_name) {
-    if (!userExists("id", id)) {
-      db.promise()
-        .query(
-          `INSERT INTO users VALUES('${id}', '${first_name}', '${last_name}')`
-        )
-        .then((r) => res.send(r[0]));
-    } else res.body = "That Username already exists!";
-  } else res.body = "Please make sure you fill in all fields.";
-  res.send();
+router.post("/", (req, res) => {
+  const user = req.body;
+  db.promise()
+    .query(`SELECT username FROM users`)
+    .then((r) => {
+      const users = r[0].map((row) => row.username);
+      if (users.includes(user.username)) {
+        res.send("User already exists!");
+      } else insertUser(res, user);
+    });
 });
 
 module.exports = router;
